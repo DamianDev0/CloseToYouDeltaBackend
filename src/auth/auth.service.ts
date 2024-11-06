@@ -22,8 +22,8 @@ export class AuthService {
     return this.userService.createUser(registerDto);
   }
 
-  async loginUser({ username, password }: LoginDto) {
-    const findUser = await this.userService.findUserWithPassword(username);
+  async loginUser({ email, password }: LoginDto) {
+    const findUser = await this.userService.findUserWithPassword(email);
 
     if (!findUser) {
       throw new UnauthorizedException('User not found');
@@ -41,7 +41,7 @@ export class AuthService {
     const accessToken = this.generateToken(findUser);
     return {
       accessToken,
-      user: findUser,
+      id: findUser.id,
     };
   }
 }
