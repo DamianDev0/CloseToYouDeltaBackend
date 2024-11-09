@@ -1,5 +1,5 @@
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { Roles } from 'src/common/enum/roles.enum';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { Roles } from '../../common/enum/roles.enum';
 
 export class CreateContactDto {
   @IsOptional()
@@ -22,13 +22,13 @@ export class CreateContactDto {
 
   @IsOptional()
   @IsEnum(Roles)
-  role: Roles;
+  role?: Roles;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  latitude?: number;
+  latitude?: string;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  longitude?: number;
+  longitude?: string;
 }

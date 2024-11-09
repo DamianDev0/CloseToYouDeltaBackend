@@ -1,16 +1,23 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Contact } from './entities/contact.entity';
 import { Repository } from 'typeorm';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 import { ActiveUserInterface } from '../common/interface/activeUserInterface';
+import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
+import { PaginationDto } from '../common/interface/pagination.dto';
 
 @Injectable()
 export class ContactsService {
   constructor(
     @InjectRepository(Contact)
     private readonly contactsRepository: Repository<Contact>,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async getAllContacts(user: ActiveUserInterface): Promise<Contact[]> {
@@ -56,35 +63,82 @@ export class ContactsService {
   async createContact(
     createContactDto: CreateContactDto,
     user: ActiveUserInterface,
+    file?: Express.Multer.File,
   ): Promise<Contact> {
-    const contact = this.contactsRepository.create({
-      ...createContactDto,
-      user: { id: user.id },
-    });
-    return this.contactsRepository.save(contact);
+    try {
+      if (file) {
+        const uploadResult = await this.cloudinaryService.uploadFile(file);
+        createContactDto.photo = uploadResult.secure_url;
+      }
+      const contact = this.contactsRepository.create({
+        ...createContactDto,
+        user: { id: user.id },
+      });
+
+      return await this.contactsRepository.save(contact);
+    } catch (error) {
+      console.error('Error al crear el contacto:', error);
+      throw new Error('No se pudo crear el contacto');
+    }
   }
 
   async createMultipleContacts(
     contacts: CreateContactDto[],
     user: ActiveUserInterface,
   ): Promise<Contact[]> {
-    const createdContacts = await Promise.all(
+    return Promise.all(
       contacts.map((contactDto) => this.createContact(contactDto, user)),
     );
-    return createdContacts;
   }
 
   async updateContact(
     id: string,
     updateContactDto: UpdateContactDto,
     user: ActiveUserInterface,
+    file?: Express.Multer.File,
   ): Promise<Contact> {
+    if (!user) throw new UnauthorizedException('User not authenticated');
+
     const contact = await this.getContactById(id, user);
-    return this.contactsRepository.save({ ...contact, ...updateContactDto });
+    if (file) {
+      const uploadResult = await this.cloudinaryService.uploadFile(file);
+      updateContactDto.photo = uploadResult.secure_url;
+    }
+
+    return this.contactsRepository.save({
+      ...contact,
+      ...updateContactDto,
+    });
   }
 
   async deleteContact(id: string, user: ActiveUserInterface): Promise<void> {
     await this.getContactById(id, user);
     await this.contactsRepository.delete(id);
+  }
+
+  async getAllContactsPagination(
+    user: ActiveUserInterface,
+    paginationDto: PaginationDto,
+  ): Promise<{
+    data: Contact[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    const { page, limit } = paginationDto;
+    const [contacts, total] = await this.contactsRepository.findAndCount({
+      where: { user: { id: user.id } },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      data: contacts,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 }

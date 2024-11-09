@@ -1,5 +1,5 @@
-import { Roles } from 'src/common/enum/roles.enum';
-import { User } from 'src/user/entities/user.entity';
+import { Roles } from '../../common/enum/roles.enum';
+import { User } from '../../user/entities/user.entity';
 import {
   Entity,
   Column,
@@ -10,9 +10,8 @@ import {
 
 @Entity()
 export class Contact {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   recordID: string;
-
   @Column()
   name: string;
 
@@ -34,10 +33,10 @@ export class Contact {
   role?: Roles;
 
   @Column('float', { nullable: true })
-  latitude: number;
+  latitude: string | number;
 
   @Column('float', { nullable: true })
-  longitude: number;
+  longitude: string | number;
 
   @ManyToOne(() => User, (user) => user.contacts)
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
