@@ -16,7 +16,7 @@ import { UpdateContactDto } from './dto/update-contact.dto';
 import { Contact } from './entities/contact.entity';
 import { ActiveUser } from '../common/decorators/active-user.decorator';
 import { ActiveUserInterface } from '../common/interface/activeUserInterface';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/guard/auth.guard';
 import { CreateContactsDto } from './dto/multipleContacts';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -24,6 +24,7 @@ import { CreateContactDto } from './dto/create-contact.dto';
 import { PaginationDto } from '../common/interface/pagination.dto';
 
 @ApiTags('Contacts')
+@ApiBearerAuth()
 @UseGuards(AuthGuard)
 @Controller('contacts')
 export class ContactsController {
