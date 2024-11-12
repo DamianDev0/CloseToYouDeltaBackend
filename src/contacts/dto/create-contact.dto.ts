@@ -1,4 +1,12 @@
-import { IsEnum, IsOptional, IsString, Validate } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+  Validate,
+} from 'class-validator';
 import { Roles } from '../../common/enum/roles.enum';
 import { IsStringOrNumber } from './Valitator.dto';
 
@@ -8,9 +16,11 @@ export class CreateContactDto {
   recordID?: string;
 
   @IsString()
+  @MinLength(1)
   name: string;
 
   @IsString()
+  @MaxLength(15)
   phone: string;
 
   @IsString()
@@ -19,6 +29,8 @@ export class CreateContactDto {
 
   @IsString()
   @IsOptional()
+  @MaxLength(40)
+  @IsEmail()
   email?: string;
 
   @IsOptional()

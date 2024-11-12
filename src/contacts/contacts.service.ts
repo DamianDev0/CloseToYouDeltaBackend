@@ -127,6 +127,7 @@ export class ContactsService {
     totalPages: number;
   }> {
     const { page, limit } = paginationDto;
+
     const [contacts, total] = await this.contactsRepository.findAndCount({
       where: { user: { id: user.id } },
       skip: (page - 1) * limit,

@@ -9,7 +9,7 @@ import {
   UseGuards,
   UploadedFile,
   UseInterceptors,
-  Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { ContactsService } from './contacts.service';
 import { UpdateContactDto } from './dto/update-contact.dto';
@@ -21,7 +21,6 @@ import { AuthGuard } from '../auth/guard/auth.guard';
 import { CreateContactsDto } from './dto/multipleContacts';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateContactDto } from './dto/create-contact.dto';
-import { PaginationDto } from '../common/interface/pagination.dto';
 
 @ApiTags('Contacts')
 @ApiBearerAuth()
@@ -59,16 +58,21 @@ export class ContactsController {
     return this.contactsService.getContactByPhone(phone, user);
   }
 
-  @Get('pagination')
+  @Get('pagination/:page/:limit')
   async getAllContactsPagination(
-    @Query() paginationDto: PaginationDto, // Captura los parámetros de paginación
-    @ActiveUser() user: ActiveUserInterface, // Obtén el usuario del token
+    @Param('page') page: number,
+    @Param('limit') limit: number,
+    @ActiveUser() user: ActiveUserInterface,
   ) {
-    console.log('Pagination DTO:', paginationDto); // Verifica los parámetros
-    console.log('User ID:', user.id); // Verifica el user.id
-    return this.contactsService.getAllContactsPagination(user, paginationDto);
-  }
+    console.log('Pagination Params - Page:', page, 'Limit:', limit);
+    console.log('User ID:', user.id);
 
+    if (!user.id || typeof user.id !== 'string') {
+      throw new BadRequestException('Invalid or missing user ID');
+    }
+
+    return this.contactsService.getAllContactsPagination(user, { page, limit });
+  }
   @Post()
   async createMultipleContacts(
     @Body() createContactsDto: CreateContactsDto,
