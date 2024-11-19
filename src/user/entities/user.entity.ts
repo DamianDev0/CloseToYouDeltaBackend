@@ -12,6 +12,12 @@ export class User {
   @Column({ unique: true })
   email: string;
 
+  @Column({ nullable: true })
+  phone?: string;
+
+  @Column({ nullable: true })
+  photo?: string;
+
   @OneToMany(() => Contact, (contact) => contact.user)
   contacts: Contact[];
 }
