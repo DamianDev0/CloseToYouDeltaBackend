@@ -12,6 +12,7 @@ import {
 export class Contact {
   @PrimaryGeneratedColumn('uuid')
   recordID: string;
+
   @Column()
   name: string;
 

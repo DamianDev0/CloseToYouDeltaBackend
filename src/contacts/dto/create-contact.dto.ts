@@ -20,7 +20,7 @@ export class CreateContactDto {
   name: string;
 
   @IsString()
-  @MaxLength(15)
+  @MaxLength(100)
   phone: string;
 
   @IsString()

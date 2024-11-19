@@ -29,6 +29,16 @@ import { CreateContactDto } from './dto/create-contact.dto';
 export class ContactsController {
   constructor(private readonly contactsService: ContactsService) {}
 
+  @Post()
+  async createMultipleContacts(
+    @Body() createContactsDto: CreateContactsDto,
+    @ActiveUser() user: ActiveUserInterface,
+  ): Promise<Contact[]> {
+    return this.contactsService.createMultipleContacts(
+      createContactsDto.contacts,
+      user,
+    );
+  }
   @Get()
   getAllContacts(@ActiveUser() user: ActiveUserInterface): Promise<Contact[]> {
     return this.contactsService.getAllContacts(user);
@@ -72,16 +82,6 @@ export class ContactsController {
     }
 
     return this.contactsService.getAllContactsPagination(user, { page, limit });
-  }
-  @Post()
-  async createMultipleContacts(
-    @Body() createContactsDto: CreateContactsDto,
-    @ActiveUser() user: ActiveUserInterface,
-  ): Promise<Contact[]> {
-    return this.contactsService.createMultipleContacts(
-      createContactsDto.contacts,
-      user,
-    );
   }
 
   @Post('oneContact')
