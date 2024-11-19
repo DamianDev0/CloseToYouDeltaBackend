@@ -149,4 +149,49 @@ export class ContactsService {
       totalPages: Math.ceil(total / limit),
     };
   }
+
+  async getContactsFiltered(
+    user: ActiveUserInterface,
+    filters: { name?: string; email?: string; phone?: string },
+    paginationDto: PaginationDto,
+  ): Promise<{
+    data: Contact[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    const { page, limit } = paginationDto;
+
+    const queryBuilder = this.contactsRepository.createQueryBuilder('contact');
+    queryBuilder.where('contact.userId = :userId', { userId: user.id });
+
+    if (filters.name) {
+      queryBuilder.andWhere('contact.name ILIKE :name', {
+        name: `%${filters.name}%`, // % para encontrar coincidencias parciales
+      });
+    }
+    if (filters.phone) {
+      queryBuilder.andWhere('contact.phone ILIKE :phone', {
+        phone: `%${filters.phone}%`,
+      });
+    }
+    if (filters.email) {
+      queryBuilder.andWhere('contact.email ILIKE :email', {
+        email: `%${filters.email}%`,
+      });
+    }
+
+    queryBuilder.skip((page - 1) * limit).take(limit);
+
+    const [contacts, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      data: contacts,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
 }

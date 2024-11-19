@@ -10,6 +10,7 @@ import {
   UploadedFile,
   UseInterceptors,
   BadRequestException,
+  Query,
 } from '@nestjs/common';
 import { ContactsService } from './contacts.service';
 import { UpdateContactDto } from './dto/update-contact.dto';
@@ -21,6 +22,7 @@ import { AuthGuard } from '../auth/guard/auth.guard';
 import { CreateContactsDto } from './dto/multipleContacts';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateContactDto } from './dto/create-contact.dto';
+import { PaginationDto } from 'src/common/interface/pagination.dto';
 
 @ApiTags('Contacts')
 @ApiBearerAuth()
@@ -28,6 +30,20 @@ import { CreateContactDto } from './dto/create-contact.dto';
 @Controller('contacts')
 export class ContactsController {
   constructor(private readonly contactsService: ContactsService) {}
+  @Get('filter')
+  async getFilteredContacts(
+    @ActiveUser() user: ActiveUserInterface,
+    @Query('name') name?: string,
+    @Query('email') email?: string,
+    @Query('phone') phone?: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+  ) {
+    const filters = { name, email, phone };
+    const pagination: PaginationDto = { page: +page, limit: +limit };
+
+    return this.contactsService.getContactsFiltered(user, filters, pagination);
+  }
 
   @Post()
   async createMultipleContacts(
@@ -50,14 +66,6 @@ export class ContactsController {
     @ActiveUser() user: ActiveUserInterface,
   ): Promise<Contact> {
     return this.contactsService.getContactById(recordID, user);
-  }
-
-  @Get('name/:name')
-  getContactByName(
-    @Param('name') name: string,
-    @ActiveUser() user: ActiveUserInterface,
-  ): Promise<Contact> {
-    return this.contactsService.getContactByName(name, user);
   }
 
   @Get('phone/:phone')
