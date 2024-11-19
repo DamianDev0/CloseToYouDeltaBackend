@@ -86,9 +86,16 @@ export class ContactsService {
     contacts: CreateContactDto[],
     user: ActiveUserInterface,
   ): Promise<Contact[]> {
-    return Promise.all(
-      contacts.map((contactDto) => this.createContact(contactDto, user)),
-    );
+    const createdContacts: Contact[] = [];
+    for (let i = 0; i < contacts.length; i++) {
+      try {
+        const contact = await this.createContact(contacts[i], user);
+        createdContacts.push(contact);
+      } catch (error) {
+        console.error(`Error creating the contact ${contacts[i].name}:`, error);
+      }
+    }
+    return createdContacts;
   }
 
   async updateContact(
