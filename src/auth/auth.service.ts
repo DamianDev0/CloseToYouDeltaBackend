@@ -4,6 +4,7 @@ import { UserService } from '../user/user.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { BcryptService } from '../common/services/bcrypt.service';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +19,7 @@ export class AuthService {
     return this.jwtService.sign(payload);
   }
 
-  async registerUser(registerDto: RegisterDto): Promise<RegisterDto> {
+  async registerUser(registerDto: RegisterDto): Promise<User> {
     return this.userService.createUser(registerDto);
   }
 

@@ -15,7 +15,7 @@ export class User {
   @Column({ nullable: true })
   phone?: string;
 
-  @Column({ nullable: true })
+  @Column()
   name?: string;
 
   @Column({ nullable: true })
