@@ -16,6 +16,9 @@ export class User {
   phone?: string;
 
   @Column({ nullable: true })
+  name?: string;
+
+  @Column({ nullable: true })
   photo?: string;
 
   @OneToMany(() => Contact, (contact) => contact.user)
